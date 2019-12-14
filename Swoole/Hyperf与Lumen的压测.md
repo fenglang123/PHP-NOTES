@@ -4,8 +4,10 @@
 - [基础环境介绍](#基础环境介绍)
 - [ab工具](#ab工具)
 - [环境搭建](#环境搭建)
-- [Lumen](#Lumen)
-- [Hyperf](#Hyperf)
+- [Lumen配置](#Lumen配置)
+- [Lumen压测](#Lumen压测)
+- [Hyperf配置](#Hyperf配置)
+- [Hyperf压测](#Hyperf压测)
 
 ### 基础环境介绍
 - CentOS 7.6 64位 Intel/Broadwell 1核 1G 20GB 
@@ -79,7 +81,7 @@ cd /usr/src &&\
 ```
 
 
-### Lumen
+### Lumen配置
 安装
 ```bash
 # 进入www目录
@@ -127,6 +129,8 @@ service nginx restart
 ```json
 Lumen (5.7.8) (Laravel Components 5.7.*)
 ```
+
+### Lumen压测
 压测
 ```bash
 ab -c 100 -n 10000 http://127.0.0.1/
@@ -210,7 +214,7 @@ Percentage of the requests served within a certain time (ms)
  100%    193 (longest request)
 ```
 
-### Hyperf
+### Hyperf配置
 安装Swoole4.4+
 ```bash
 wget https://github.com/swoole/swoole-src/archive/v4.4.12.tar.gz &&\
@@ -317,6 +321,8 @@ service nginx restart
   "message": "Hello Hyperf."
 }
 ```
+
+### Hyperf压测
 压测
 ```bash
 ab -c 100 -n 10000 http://127.0.0.1/
