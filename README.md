@@ -166,6 +166,7 @@ Linux、计算机网络、数据结构、算法、PHP、MySQL、设计模式、R
   - [异步Task](Swoole/异步Task.md)
   - [基于websocket实现多人聊天室](Swoole/基于websocket实现多人聊天室.md)
   - [HTTP](Swoole/HTTP.md)
+  - [Hyperf与Lumen的压测](Swoole/Hyperf与Lumen的压测.md)
   
 - 容器
   - [Docker基础操作](容器/Docker基础操作.md)

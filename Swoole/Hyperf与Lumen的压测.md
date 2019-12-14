@@ -1,0 +1,405 @@
+# Hyperf与Lumen的压测
+
+## 目录
+- [基础环境介绍](#基础环境介绍)
+- [ab工具](#ab工具)
+- [环境搭建](#环境搭建)
+- [Lumen](#Lumen)
+- [Hyperf](#Hyperf)
+
+### 基础环境介绍
+- CentOS 7.6 64位 Intel/Broadwell 1核 1G 20GB 
+- PHP 7.3.12
+- Nginx 1.16.1
+- Lumen 5.7
+- Swoole 4.4.12
+- Hyperf 1.1.2
+
+### ab工具
+安装
+```bash
+yum -y install httpd-tools
+```
+
+### 环境搭建
+
+基础环境
+```bash
+# 安装基础软件
+yum -y install vim wget
+
+# 应用目录
+mkdir -p /data/www && chmod -R 777 /data/www
+```
+
+PHP相关
+```bash
+# 安装epel源
+yum install -y epel-release &&\
+	rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm
+	
+# 安装PHP及其扩展
+yum install -y --enablerepo=remi --enablerepo=remi-php73 \
+    php \
+    php-opcache \
+    php-devel \
+    php-mbstring \
+    php-xml \
+    php-zip \
+    php-cli \
+    php-fpm \
+    php-mcrypt \
+    php-mysql \
+    php-pdo \
+    php-curl \
+    php-gd \
+    php-mysqld \
+    php-bcmath \
+    php-redis \
+    php-process \
+    openssh-server \
+    gcc \
+    gcc-c++ \
+    make \
+    unzip &&\
+    mkdir /run/php-fpm/
+    
+# 安装Composer
+curl -sSL https://getcomposer.org/installer | php &&\
+    mv composer.phar /usr/local/bin/composer &&\
+    composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+```
+
+Nginx相关
+```bash
+cd /usr/src &&\ 
+    wget http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm &&\
+    rpm -ivh nginx-release-centos-7-0.el7.ngx.noarch.rpm &&\
+    yum -y install nginx
+```
+
+
+### Lumen
+安装
+```bash
+# 进入www目录
+cd /data/www
+
+# 通过composer安装
+composer create-project laravel/lumen lumen-app "5.7.*"
+```
+Nginx配置
+```bash
+# conf文件配置
+mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/lumen-app.conf
+vim /etc/nginx/conf.d/lumen-app.conf
+```
+lumen-app.conf内容
+```bash
+server {
+    listen       80;
+    server_name  lumen-app.com;
+
+    root /data/www/lumen-app/public;
+    index index.html index.htm index.php;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+        try_files $uri =404;
+    }
+}
+```
+启动
+```bash
+# 启动PHP-FPM
+/usr/sbin/php-fpm -c /etc/php.ini -y /etc/php-fpm.conf
+
+# 启动Nginx
+service nginx restart
+```
+浏览器访问：http://106.75.117.140/
+```json
+Lumen (5.7.8) (Laravel Components 5.7.*)
+```
+压测
+```bash
+ab -c 100 -n 10000 http://127.0.0.1/
+```
+压测结果
+```bash
+# 第一次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /
+Document Length:        40 bytes
+
+Concurrency Level:      100
+Time taken for tests:   11.259 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      2750000 bytes
+HTML transferred:       400000 bytes
+Requests per second:    888.16 [#/sec] (mean)
+Time per request:       112.592 [ms] (mean)
+Time per request:       1.126 [ms] (mean, across all concurrent requests)
+Transfer rate:          238.52 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.4      0       2
+Processing:     6  112  17.6    107     190
+Waiting:        3  111  17.6    107     189
+Total:          6  112  17.5    108     190
+
+Percentage of the requests served within a certain time (ms)
+  50%    108
+  66%    116
+  75%    122
+  80%    124
+  90%    136
+  95%    146
+  98%    161
+  99%    164
+ 100%    190 (longest request)
+
+# 第二次 
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /
+Document Length:        40 bytes
+
+Concurrency Level:      100
+Time taken for tests:   11.033 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      2750000 bytes
+HTML transferred:       400000 bytes
+Requests per second:    906.35 [#/sec] (mean)
+Time per request:       110.332 [ms] (mean)
+Time per request:       1.103 [ms] (mean, across all concurrent requests)
+Transfer rate:          243.40 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       3
+Processing:     6  109  13.8    108     192
+Waiting:        3  108  13.9    108     192
+Total:          6  110  13.7    109     193
+
+Percentage of the requests served within a certain time (ms)
+  50%    109
+  66%    110
+  75%    112
+  80%    117
+  90%    125
+  95%    137
+  98%    151
+  99%    154
+ 100%    193 (longest request)
+```
+
+### Hyperf
+安装Swoole4.4+
+```bash
+wget https://github.com/swoole/swoole-src/archive/v4.4.12.tar.gz &&\
+	tar -zxvf v4.4.12.tar.gz &&\
+	cd swoole-src-4.4.12 &&\
+	phpize &&\
+	./configure &&\
+	make && make install &&\
+	sed -i '$a \\n[swoole]\nextension=swoole.so\n' /etc/php.ini &&\
+	cd ../ && rm -rf v4.4.12.tar.gz swoole-src-4.4.12
+```
+关闭Swoole短名
+```bash
+vim /etc/php.ini
+# 新增一行
+swoole.use_shortname = 'Off'
+# 查看swoole扩展信息
+$ php --ri swoole
+
+swoole
+
+Swoole => enabled
+Author => Swoole Team <team@swoole.com>
+Version => 4.4.12
+Built => Dec 14 2019 19:42:51
+coroutine => enabled
+epoll => enabled
+eventfd => enabled
+signalfd => enabled
+cpu_affinity => enabled
+spinlock => enabled
+rwlock => enabled
+http2 => enabled
+pcre => enabled
+zlib => 1.2.7
+mutex_timedlock => enabled
+pthread_barrier => enabled
+futex => enabled
+async_redis => enabled
+
+Directive => Local Value => Master Value
+swoole.display_errors => On => On
+swoole.enable_coroutine => On => On
+swoole.enable_library => On => On
+swoole.enable_preemptive_scheduler => Off => Off
+swoole.unixsock_buffer_size => 8388608 => 8388608
+swoole.use_shortname => Off => Off
+```
+
+安装Hyperf
+```bash
+# 进入www目录
+cd /data/www
+
+# 通过composer安装
+composer create-project hyperf/hyperf-skeleton hyperf-app
+```
+
+关闭PHP-FPM
+```bash
+kill -INT `cat /run/php-fpm/php-fpm.pid`
+```
+
+Nginx配置
+```bash
+# conf文件配置
+touch /etc/nginx/conf.d/hyperf-app.conf
+vim /etc/nginx/conf.d/hyperf-app.conf
+```
+hyperf-app.conf内容
+```bash
+upstream hyperf {
+    # 至少需要一个 Hyperf 节点，多个配置多行
+    server 127.0.0.1:9501;
+}
+
+server {
+    listen 80; 
+    server_name hyperf-app.com;
+
+    location / {
+        # 将客户端的 Host 和 IP 信息一并转发到对应节点  
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # 执行代理访问真实服务器
+        proxy_pass http://hyperf;
+    }
+}
+```
+启动
+```bash
+# 启动Hyperf服务
+cd /data/www/hyperf-app && php bin/hyperf.php start
+
+# 重启Nginx
+service nginx restart
+```
+浏览器访问：http://106.75.117.140/
+```json
+{
+  "method": "GET",
+  "message": "Hello Hyperf."
+}
+```
+压测
+```bash
+ab -c 100 -n 10000 http://127.0.0.1/
+```
+压测结果
+```bash
+# 第一次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   2.257 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      1910000 bytes
+HTML transferred:       420000 bytes
+Requests per second:    4430.87 [#/sec] (mean)
+Time per request:       22.569 [ms] (mean)
+Time per request:       0.226 [ms] (mean, across all concurrent requests)
+Transfer rate:          826.46 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.6      2       4
+Processing:     4   21   1.0     21      24
+Waiting:        2   19   0.8     19      22
+Total:          4   23   0.9     22      25
+WARNING: The median and mean for the total time are not within a normal deviation
+        These results are probably not that reliable.
+
+Percentage of the requests served within a certain time (ms)
+  50%     22
+  66%     23
+  75%     23
+  80%     23
+  90%     24
+  95%     24
+  98%     24
+  99%     25
+ 100%     25 (longest request)
+
+# 第二次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   2.283 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      1910000 bytes
+HTML transferred:       420000 bytes
+Requests per second:    4380.00 [#/sec] (mean)
+Time per request:       22.831 [ms] (mean)
+Time per request:       0.228 [ms] (mean, across all concurrent requests)
+Transfer rate:          816.97 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.5      2       4
+Processing:     5   21   1.4     21      31
+Waiting:        2   19   1.2     19      29
+Total:          5   23   1.3     22      32
+
+Percentage of the requests served within a certain time (ms)
+  50%     22
+  66%     23
+  75%     23
+  80%     23
+  90%     24
+  95%     25
+  98%     25
+  99%     32
+ 100%     32 (longest request)
+```
+
+
