@@ -8,6 +8,8 @@
 - [Lumen压测](#Lumen压测)
 - [Hyperf配置](#Hyperf配置)
 - [Hyperf压测](#Hyperf压测)
+- [Lumen数据库操作压测](#Lumen数据库操作压测)
+- [Hyperf数据库操作压测](#Hyperf数据库操作压测)
 
 ### 基础环境介绍
 - CentOS 7.6 64位 Intel/Broadwell 1核 1G 20GB 
@@ -80,6 +82,42 @@ cd /usr/src &&\
     yum -y install nginx
 ```
 
+MySQL相关
+```bash
+cd /usr/src &&\
+    wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm &&\
+    rpm -ivh mysql57-community-release-el7-8.noarch.rpm &&\
+    yum -y install mysql-community-server
+    
+# 启动服务
+service mysqld start
+# 查看密码
+cat /var/log/mysqld.log | grep 'temporary password'
+# 登录并修改密码
+mysql> set password = password('WYX*wyx123');
+# 开放MySQL远程连接(%表示允许任何主机连接)
+mysql> use mysql;
+mysql> select host,user from user;
+mysql> update user set host = '%' where host = 'localhost' and user = 'root';
+mysql> flush privileges;
+
+# 建库建表
+create database app;
+
+CREATE TABLE `t_category` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `category_name` varchar(32) NOT NULL DEFAULT '' COMMENT '分类名称',
+  `category_remark` varchar(32) NOT NULL DEFAULT '' COMMENT '备注',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态 -1:禁用;1:启用;',
+  `mtime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `ctime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试分类表';
+
+# 插入1条测试数据
+insert into t_category (category_name,category_remark) values ('测试分类1', '测试分类1的描述');
+```
 
 ### Lumen配置
 安装
@@ -409,3 +447,7 @@ Percentage of the requests served within a certain time (ms)
 ```
 
 
+### Lumen数据库操作压测
+待测
+### Hyperf数据库操作压测
+待测
