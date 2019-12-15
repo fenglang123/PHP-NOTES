@@ -3,7 +3,7 @@
 ## 目录
 - [基础环境介绍](#基础环境介绍)
 - [ab工具](#ab工具)
-- [环境搭建](#环境搭建)
+- [LNMP环境搭建](#LNMP环境搭建)
 - [Lumen配置](#Lumen配置)
 - [Lumen压测](#Lumen压测)
 - [Hyperf配置](#Hyperf配置)
@@ -25,7 +25,7 @@
 yum -y install httpd-tools
 ```
 
-### 环境搭建
+### LNMP环境搭建
 
 基础环境
 ```bash
@@ -448,6 +448,270 @@ Percentage of the requests served within a certain time (ms)
 
 
 ### Lumen数据库操作压测
-待测
+配置
+```bash
+# .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=app
+DB_USERNAME=root
+DB_PASSWORD=WYX*wyx123
+
+# routes/web.php
+$router->get('category/{id}', 'CategoryController@detail');
+
+# app/Http/Controllers/CategoryController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\DB;
+
+class CategoryController extends Controller
+{
+    public function detail($id)
+    {
+        $sql = 'select * from t_category where id = ' . $id;
+        // 需要在bootstrap/app.php中打开$app->withFacades();
+        return DB::select($sql);
+    }
+}
+```
+浏览器访问：http://106.75.117.140/category/1
+```json
+[
+    {
+        "id": 1,
+        "category_name": "测试分类1",
+        "category_remark": "测试分类1的描述",
+        "status": 1,
+        "mtime": "2019-12-14 21:46:40",
+        "ctime": "2019-12-14 21:46:40"
+    }
+]
+```
+压测
+```bash
+ab -c 100 -n 10000 http://127.0.0.1/category/1
+```
+压测结果
+```bash
+# 第一次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /category/1
+Document Length:        189 bytes
+
+Concurrency Level:      100
+Time taken for tests:   30.597 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      4160000 bytes
+HTML transferred:       1890000 bytes
+Requests per second:    326.83 [#/sec] (mean)
+Time per request:       305.968 [ms] (mean)
+Time per request:       3.060 [ms] (mean, across all concurrent requests)
+Transfer rate:          132.78 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.3      0       3
+Processing:    11  305 110.7    284     728
+Waiting:        9  304 110.6    283     728
+Total:         12  305 110.6    284     729
+
+Percentage of the requests served within a certain time (ms)
+  50%    284
+  66%    319
+  75%    373
+  80%    422
+  90%    480
+  95%    517
+  98%    553
+  99%    581
+ 100%    729 (longest request)
+
+# 第二次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /category/1
+Document Length:        189 bytes
+
+Concurrency Level:      100
+Time taken for tests:   30.408 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      4160000 bytes
+HTML transferred:       1890000 bytes
+Requests per second:    328.86 [#/sec] (mean)
+Time per request:       304.080 [ms] (mean)
+Time per request:       3.041 [ms] (mean, across all concurrent requests)
+Transfer rate:          133.60 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.3      0       3
+Processing:    13  303 123.5    249     625
+Waiting:       10  302 123.4    249     624
+Total:         13  303 123.5    249     625
+
+Percentage of the requests served within a certain time (ms)
+  50%    249
+  66%    314
+  75%    428
+  80%    449
+  90%    497
+  95%    527
+  98%    562
+  99%    587
+ 100%    625 (longest request)
+```
+
 ### Hyperf数据库操作压测
-待测
+```bash
+# 安装组件
+composer require hyperf/db-connection
+
+# .env
+DB_DRIVER=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=app
+DB_USERNAME=root
+DB_PASSWORD=WYX*wyx123
+DB_CHARSET=utf8mb4
+DB_COLLATION=utf8mb4_unicode_ci
+DB_PREFIX=
+
+# config/routes.php
+Router::get('/category/{id}', 'App\Controller\CategoryController@detail');
+
+# app/Controller/CategoryController.php
+<?php
+
+declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://doc.hyperf.io
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
+ */
+
+namespace App\Controller;
+
+use Hyperf\DbConnection\Db;
+
+class CategoryController extends AbstractController
+{
+    public function detail(int $id)
+    {
+        $res = Db::table('t_category')->where('id', $id)->get();
+        return $res;
+    }
+}
+```
+浏览器访问：http://106.75.117.140/category/1
+```json
+[
+    {
+        "id": 1,
+        "category_name": "测试分类1",
+        "category_remark": "测试分类1的描述",
+        "status": 1,
+        "mtime": "2019-12-14 21:46:40",
+        "ctime": "2019-12-14 21:46:40"
+    }
+]
+```
+
+压测
+```bash
+ab -c 100 -n 10000 http://127.0.0.1/category/1
+```
+压测结果
+```bash
+# 第一次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /category/1
+Document Length:        156 bytes
+
+Concurrency Level:      100
+Time taken for tests:   7.174 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      3060000 bytes
+HTML transferred:       1560000 bytes
+Requests per second:    1393.98 [#/sec] (mean)
+Time per request:       71.737 [ms] (mean)
+Time per request:       0.717 [ms] (mean, across all concurrent requests)
+Transfer rate:          416.56 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       3
+Processing:    20   71   3.6     71     119
+Waiting:       18   71   3.6     71     119
+Total:         21   71   3.6     71     120
+
+Percentage of the requests served within a certain time (ms)
+  50%     71
+  66%     72
+  75%     72
+  80%     72
+  90%     74
+  95%     75
+  98%     77
+  99%     79
+ 100%    120 (longest request)
+
+# 第二次
+Server Software:        nginx/1.16.1
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /category/1
+Document Length:        156 bytes
+
+Concurrency Level:      100
+Time taken for tests:   7.318 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Total transferred:      3060000 bytes
+HTML transferred:       1560000 bytes
+Requests per second:    1366.54 [#/sec] (mean)
+Time per request:       73.178 [ms] (mean)
+Time per request:       0.732 [ms] (mean, across all concurrent requests)
+Transfer rate:          408.36 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       3
+Processing:    13   73   5.4     71     103
+Waiting:       10   73   5.4     71     103
+Total:         13   73   5.3     71     104
+
+Percentage of the requests served within a certain time (ms)
+  50%     71
+  66%     74
+  75%     75
+  80%     76
+  90%     80
+  95%     81
+  98%     85
+  99%     89
+ 100%    104 (longest request)
+```
