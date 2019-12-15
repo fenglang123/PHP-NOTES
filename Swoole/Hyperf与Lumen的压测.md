@@ -16,6 +16,7 @@
 - CentOS 7.6 64位 Intel/Broadwell 1核 1G 20GB 
 - PHP 7.3.12
 - Nginx 1.16.1
+- MySQL 5.7
 - Lumen 5.7
 - Swoole 4.4.12
 - Hyperf 1.1.2
