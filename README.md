@@ -1,7 +1,11 @@
-<h1 align="center"> php-notes </h1>
-<h3 align="center"> 用 markdown 记录开发或面试中可能遇到的知识点, 查漏补缺</h3>
+<h1 align="center"> 
+    php-notes 
+</h1>
+<h3 align="center"> 
+    以 markdown 的形式记录平时遇到的知识点，查漏补缺 
+</h3>
 <p align="center"> 
-Linux、计算机网络、数据结构、算法、PHP、MySQL、设计模式、Redis、MQ、安全、思维题、报错总结......
+    Linux、计算机网络、数据结构、算法、PHP、MySQL、设计模式、Redis、MQ、安全、思维题...
 </p>
 
 ### 目录
@@ -13,6 +17,7 @@ Linux、计算机网络、数据结构、算法、PHP、MySQL、设计模式、R
   - [select、poll、epoll](Linux/select、poll、epoll.md)
   - [并发和并行的区别](Linux/并发和并行的区别.md)
   - [进程和线程的区别](Linux/进程和线程的区别.md)
+  - [多CPU、多核、多进程、多线程、并发、并行](Linux/多CPU、多核、多进程、多线程、并发、并行.md)
   - [协程](Linux/协程.md)
   - [孤儿进程和僵尸进程](Linux/孤儿进程和僵尸进程.md)
   - [Linux基本命令](Linux/Linux基本命令.md)
