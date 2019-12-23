@@ -173,6 +173,7 @@
   - [HTTP](Swoole/HTTP.md)
   - [Hyperf与Lumen的压测](Swoole/Hyperf与Lumen的压测.md)
   - [协程与线程](Swoole/协程与线程.md)
+  - [理解协程的执行过程](Swoole/理解协程的执行过程.md)
   
 - 容器
   - [Docker基础操作](容器/Docker基础操作.md)
