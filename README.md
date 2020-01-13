@@ -95,6 +95,7 @@
   - [CGI、FastCGI、PHP-FPM、PHP-CGI](PHP/CGI、FastCGI、PHP-FPM、PHP-CGI.md)
   - [Trait](PHP/Trait.md)
   - [yield](PHP/yield.md)
+  - [并发问题的解决方案](PHP/并发问题的解决方案.md)
   - PHP多进程
     - [PHP多进程初探-创建子进程](PHP/PHP多进程初探-创建子进程.md)
     - [PHP进程间通信](PHP/PHP进程间通信.md)
