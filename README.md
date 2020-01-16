@@ -1,11 +1,11 @@
 <h1 align="center"> 
-    php-notes 
+    PHP-NOTES 
 </h1>
 <h3 align="center"> 
     以 markdown 的形式记录平时遇到的知识点，查漏补缺 
 </h3>
 <p align="center"> 
-    Linux、计算机网络、数据结构、算法、PHP、MySQL、设计模式、Redis、MQ、安全、思维题...
+    Linux、计算机网络、数据结构、算法、PHP、MySQL、设计模式、Redis...
 </p>
 
 ### 目录
@@ -152,6 +152,7 @@
   - [MySQL事务的4个特性](MySQL/MySQL事务的4个特性.md)
   - [事务的隔离级别](MySQL/事务的隔离级别.md)
   - [如何分析SQL查询语句的性能](MySQL/如何分析SQL查询语句的性能.md)
+  - [MySQL中InnoDB的锁机制](MySQL/MySQL中InnoDB的锁机制.md)
 
 - 设计模式
   - [设计模式简介](设计模式/设计模式简介.md)
