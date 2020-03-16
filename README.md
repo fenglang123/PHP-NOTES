@@ -92,7 +92,7 @@
 
 - PHP
   - [PHP数据类型](PHP/PHP数据类型.md)
-  - [CGI、FastCGI、PHP-FPM、PHP-CGI](PHP/CGI、FastCGI、PHP-FPM、PHP-CGI.md)
+  - [CGI、FastCGI、PHP-FPM、PHP-CGI](PHP/关于CGI、FastCGI、PHP-FPM、PHP-CGI.md)
   - [Trait](PHP/Trait.md)
   - [yield](PHP/yield.md)
   - [并发问题的解决方案](PHP/并发问题的解决方案.md)
